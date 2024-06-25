@@ -2,19 +2,16 @@
 
 namespace app\controllers;
 
-use app\models\base\Answer;
-use app\models\base\Question;
-use app\models\search\AnswerSearch;
-use app\models\search\QuestionSearch;
-use Yii;
+use app\models\base\Count;
+use app\models\search\CountSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * QuestionController implements the CRUD actions for Question model.
+ * CountController implements the CRUD actions for Count model.
  */
-class QuestionController extends Controller
+class CountController extends Controller
 {
     /**
      * @inheritDoc
@@ -35,13 +32,13 @@ class QuestionController extends Controller
     }
 
     /**
-     * Lists all Question models.
+     * Lists all Count models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new QuestionSearch();
+        $searchModel = new CountSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -51,7 +48,7 @@ class QuestionController extends Controller
     }
 
     /**
-     * Displays a single Question model.
+     * Displays a single Count model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -64,13 +61,13 @@ class QuestionController extends Controller
     }
 
     /**
-     * Creates a new Question model.
+     * Creates a new Count model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Question();
+        $model = new Count();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -86,7 +83,7 @@ class QuestionController extends Controller
     }
 
     /**
-     * Updates an existing Question model.
+     * Updates an existing Count model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -106,7 +103,7 @@ class QuestionController extends Controller
     }
 
     /**
-     * Deletes an existing Question model.
+     * Deletes an existing Count model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
      * @return \yii\web\Response
@@ -120,40 +117,18 @@ class QuestionController extends Controller
     }
 
     /**
-     * Finds the Question model based on its primary key value.
+     * Finds the Count model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return Question the loaded model
+     * @return Count the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Question::findOne(['id' => $id])) !== null) {
+        if (($model = Count::findOne(['id' => $id])) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
-    }
-    public function actionViewAnswers($id)
-    {
-        $question = $this->findModel($id);
-        $searchModel = new AnswerSearch();
-
-        $dataProvider = $searchModel->searchByQuestion($this->request->queryParams, $id);
-        return $this->render('view-answers', ['dataProvider'=>$dataProvider, 'searchModel'=>$searchModel, 'question'=>$question]);
-
-    }
-    public function actionCreateAnswer($question_id)
-    {
-        $answer = new Answer();
-        $answer->question_id = $question_id;
-
-        if ($answer->load(Yii::$app->request->post()) && $answer->save()) {
-            return $this->redirect(['view-answers', 'id' => $question_id]);
-        }
-
-        return $this->render('create-answer', [
-            'model' => $answer,
-        ]);
     }
 }

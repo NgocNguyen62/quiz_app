@@ -5,22 +5,24 @@ namespace app\models\base;
 use Yii;
 
 /**
- * This is the model class for table "question".
+ * This is the model class for table "count".
  *
  * @property int $id
+ * @property int $user_id
  * @property int $template_id
- * @property string $question_text
+ * @property int|null $copy_count
  *
  * @property Template $template
+ * @property User $user
  */
-class Question extends \yii\db\ActiveRecord
+class Count extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'question';
+        return 'count';
     }
 
     /**
@@ -29,10 +31,10 @@ class Question extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['template_id', 'question_text'], 'required'],
-            [['template_id'], 'integer'],
-            [['question_text'], 'string'],
+            [['user_id', 'template_id'], 'required'],
+            [['user_id', 'template_id', 'copy_count'], 'integer'],
             [['template_id'], 'exist', 'skipOnError' => true, 'targetClass' => Template::class, 'targetAttribute' => ['template_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -43,8 +45,9 @@ class Question extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'user_id' => 'User ID',
             'template_id' => 'Template ID',
-            'question_text' => 'Question Text',
+            'copy_count' => 'Copy Count',
         ];
     }
 
@@ -57,20 +60,14 @@ class Question extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Template::class, ['id' => 'template_id']);
     }
-    public function getAnswers(){
-        return $this->hasMany(Answer::class, ['question_id'=>'id']);
-    }
-    public function getCorrectAnswer(){
-        foreach ($this->getAnswers()->all() as $answer) {
-            if ($answer->is_correct == 1) {
-                return $answer->answer_text;
-            }
-        }
-        return null;
-    }
-    public function getOptions(){
-        return $this->hasMany(Answer::className(), ['question_id' => 'id'])
-            ->where(['is_correct' => 0])
-            ->all();
+
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 }

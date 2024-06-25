@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\ContactForm;
 use app\models\form\LoginForm;
+use app\models\search\TemplateSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -61,7 +62,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $searchModel = new TemplateSearch();
+        $dataProvider = $searchModel->search($this->request->queryParams);
+
+        return $this->render('quiz', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
@@ -124,5 +131,14 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+    public function actionQuiz(){
+        $searchModel = new TemplateSearch();
+        $dataProvider = $searchModel->search($this->request->queryParams);
+
+        return $this->render('quiz', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

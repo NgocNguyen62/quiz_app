@@ -2,12 +2,18 @@
 
 namespace app\controllers;
 
+use app\models\base\Count;
+use app\models\base\Question;
+use app\models\base\Result;
 use app\models\base\Template;
+use app\models\form\QuizForm;
+use app\models\search\QuestionSearch;
 use app\models\search\TemplateSearch;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use kartik\export\ExportMenu;
 /**
  * TemplateController implements the CRUD actions for Template model.
  */
@@ -130,5 +136,90 @@ class TemplateController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+    public function actionViewQuestions($id){
+        $template = $this->findModel($id);
+
+        $searchModel = new QuestionSearch();
+        $dataProvider = $searchModel->searchByTemplate($this->request->queryParams, $id);
+        return $this->render('view-questions', ['dataProvider'=>$dataProvider, 'searchModel'=>$searchModel, 'template'=>$template]);
+    }
+    public function actionCreateQuestion($template_id)
+    {
+        $question = new Question();
+        $question->template_id = $template_id;
+
+        if ($question->load(Yii::$app->request->post()) && $question->save()) {
+            return $this->redirect(['view-questions', 'id' => $template_id]);
+        }
+
+        return $this->render('create-question', [
+            'model' => $question,
+        ]);
+    }
+
+    public function actionTakeQuiz($template_id){
+        $questions = Question::find()->where(['template_id' => $template_id])->all();
+        $template = $this->findModel($template_id);
+        $quizForm = new QuizForm();
+        $existingResult = Result::find()->where(['user_id' => Yii::$app->user->id, 'template_id' => $template_id])->one();
+        if (Yii::$app->request->isPost) {
+            if(!$existingResult){
+                $quizForm->load(Yii::$app->request->post());
+                $quizForm->user_id = Yii::$app->user->id;
+                $quizForm->template_id = $template_id;
+                $score = $quizForm->checkAnswer();
+                $quizForm->save($score);
+            }
+
+            return $this->goHome();
+        }
+        return $this->render('take-quiz', [
+            'questions' => $questions,
+            'template'=>$template
+        ]);
+    }
+    public function actionIncrementCopyCount($id)
+    {
+        $id = (int) $id;
+        $model = Count::find()->where(['user_id'=>Yii::$app->user->id])->andWhere(['template_id'=>$id])->one();
+        if ($model) {
+            $model->copy_count += 1;
+            $model->save();
+        } else {
+            $model = new Count();
+            $model->user_id = Yii::$app->user->id;
+            $model->template_id = $id;
+            $model->copy_count = 1;
+            if (!$model->save()) {
+                // In ra lỗi nếu lưu không thành công
+                var_dump($model);
+                var_dump($model->getErrors());
+                die();
+            }
+            $model->save();
+        }
+
+        return $this->goHome();
+    }
+
+
+    public function actionExport(){
+        $searchModdel = new TemplateSearch();
+        $dataProvider = $searchModdel->search(Yii::$app->request->queryParams);
+        $exporter = new ExportMenu([
+            'dataProvider' => $dataProvider,
+            'columns' => [
+                'id',
+                'content'
+            ],
+            'filename'=>'Template-'.date('Y-m-d'),
+            'exportConfig' => [
+                ExportMenu::FORMAT_EXCEL => ['label' => 'Excel'],
+                ExportMenu::FORMAT_CSV => ['label' => 'CSV'],
+            ],
+        ]);
+        $exporterOutput = $exporter->render();
+        return $this->render('export', ['exporterOutput' => $exporterOutput]);
     }
 }

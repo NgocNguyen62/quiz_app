@@ -4,12 +4,12 @@ namespace app\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\base\Question;
+use app\models\base\Result;
 
 /**
- * QuestionSearch represents the model behind the search form of `app\models\base\Question`.
+ * ResultSearch represents the model behind the search form of `app\models\base\Result`.
  */
-class QuestionSearch extends Question
+class ResultSearch extends Result
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,7 @@ class QuestionSearch extends Question
     public function rules()
     {
         return [
-            [['id', 'template_id'], 'integer'],
-            [['question_text'], 'safe'],
+            [['id', 'user_id', 'template_id', 'score'], 'integer'],
         ];
     }
 
@@ -40,7 +39,7 @@ class QuestionSearch extends Question
      */
     public function search($params)
     {
-        $query = Question::find();
+        $query = Result::find();
 
         // add conditions that should always apply here
 
@@ -59,38 +58,10 @@ class QuestionSearch extends Question
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'user_id' => $this->user_id,
             'template_id' => $this->template_id,
+            'score' => $this->score,
         ]);
-
-        $query->andFilterWhere(['like', 'question_text', $this->question_text]);
-
-        return $dataProvider;
-    }
-    public function searchByTemplate($params, $id)
-    {
-        $query = Question::find()->where(['template_id'=>$id]);
-
-        // add conditions that should always apply here
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        $this->load($params);
-
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'template_id' => $this->template_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'question_text', $this->question_text]);
 
         return $dataProvider;
     }

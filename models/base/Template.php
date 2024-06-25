@@ -52,4 +52,14 @@ class Template extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Question::class, ['template_id' => 'id']);
     }
+
+    public function canCopy(){
+        $result = Result::find()->where(['user_id'=>Yii::$app->user->id])->andWhere(['template_id'=>$this->id])->one();
+        $questions = $this->getQuestions()->count();
+
+        if ($result !== null && $result->score == $questions) {
+            return true;
+        }
+        return false;
+    }
 }

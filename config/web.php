@@ -42,6 +42,10 @@ $config = [
             ],
         ],
         'db' => $db,
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+            'defaultRoles' => ['admin', 'user'],
+        ],
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
@@ -50,8 +54,55 @@ $config = [
             ],
         ],
         */
+        'assetManager' => [
+            'bundles' => [
+                'kartik\form\ActiveFormAsset' => [
+                    'bsDependencyEnabled' => false // do not load bootstrap assets for a specific asset bundle
+                ],
+            ],
+        ],
+    ],
+    'modules' => [
+        'gridview' => ['class' => 'kartik\grid\Module']
     ],
     'params' => $params,
+    'as globalAccess' => [
+        'class' => 'yii\filters\AccessControl',
+        'rules' => [
+            [
+                'actions' => ['error'],
+                'allow' => true,
+                'roles' => ["?", "@"],
+            ],
+            [
+                'allow' => true,
+                'controllers' => ['site'],
+//                'actions' => ['login', 'logout', 'index', 'categories', 'category-details', 'register'],
+                'roles' => ['?', '@'],
+            ],
+            [
+                'allow' => true,
+                'controllers' => ['template'],
+                'actions' => ['take-quiz', 'increment-copy-count'],
+                'roles' => ['@'],
+            ],
+            [
+                'allow' => true,
+                'controllers' => ['count'],
+                'roles' => ['?', '@'],
+            ],
+            [
+                'allow' => true,
+                'controllers' => ['question'],
+                'roles' => ['admin'],
+            ],
+
+            [
+                'allow' => true,
+                'roles' => ['admin'],
+            ],
+        ]
+    ]
 ];
 
 if (YII_ENV_DEV) {

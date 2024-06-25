@@ -4,12 +4,12 @@ namespace app\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\base\Question;
+use app\models\base\Answer;
 
 /**
- * QuestionSearch represents the model behind the search form of `app\models\base\Question`.
+ * AnswerSearch represents the model behind the search form of `app\models\base\Answer`.
  */
-class QuestionSearch extends Question
+class AnswerSearch extends Answer
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class QuestionSearch extends Question
     public function rules()
     {
         return [
-            [['id', 'template_id'], 'integer'],
-            [['question_text'], 'safe'],
+            [['id', 'question_id', 'is_correct'], 'integer'],
+            [['answer_text'], 'safe'],
         ];
     }
 
@@ -38,9 +38,9 @@ class QuestionSearch extends Question
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function searchByQuestion($params, $id)
     {
-        $query = Question::find();
+        $query = Answer::find()->where(['question_id'=>$id]);
 
         // add conditions that should always apply here
 
@@ -59,16 +59,18 @@ class QuestionSearch extends Question
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'template_id' => $this->template_id,
+            'question_id' => $this->question_id,
+            'is_correct' => $this->is_correct,
         ]);
 
-        $query->andFilterWhere(['like', 'question_text', $this->question_text]);
+        $query->andFilterWhere(['like', 'answer_text', $this->answer_text]);
 
         return $dataProvider;
     }
-    public function searchByTemplate($params, $id)
+
+    public function search($params)
     {
-        $query = Question::find()->where(['template_id'=>$id]);
+        $query = Answer::find();
 
         // add conditions that should always apply here
 
@@ -87,10 +89,11 @@ class QuestionSearch extends Question
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'template_id' => $this->template_id,
+            'question_id' => $this->question_id,
+            'is_correct' => $this->is_correct,
         ]);
 
-        $query->andFilterWhere(['like', 'question_text', $this->question_text]);
+        $query->andFilterWhere(['like', 'answer_text', $this->answer_text]);
 
         return $dataProvider;
     }
