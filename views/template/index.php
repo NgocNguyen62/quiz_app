@@ -6,7 +6,6 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-
 /** @var yii\web\View $this */
 /** @var app\models\search\TemplateSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
@@ -16,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="template-index">
 
-    <?= Html::a('Export Excel', ['export'], ['class' => 'btn btn-primary']) ?>
+<!--    --><?php //= Html::a('Export Excel', ['export'], ['class' => 'btn btn-primary']) ?>
 
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
